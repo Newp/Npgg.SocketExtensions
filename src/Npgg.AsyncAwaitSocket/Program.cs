@@ -19,7 +19,7 @@ namespace Npgg.AsyncAwaitSocket
             var listener = Listen();
 
             await Task.Delay(1000);
-            for(int i =0;i<100;i++)
+            for(int i =0;i<100000;i++)
             {
                 _ = StartClient(i);
             }
@@ -30,7 +30,7 @@ namespace Npgg.AsyncAwaitSocket
         static async Task StartClient(int id)
         {
             TcpClient tcpClient = new TcpClient();
-            tcpClient.Connect(IPAddress.Parse("127.0.0.1"), Port);
+            await tcpClient.ConnectAsync(IPAddress.Parse("127.0.0.1"), Port);
 
             var socket = tcpClient.Client;
 
@@ -59,12 +59,12 @@ namespace Npgg.AsyncAwaitSocket
             while (true)
             {
                 var client = await listener.AcceptTcpClientAsync().ConfigureAwait(false);
-                _ = Handle(client.Client);
+                _ = ReceiveHandle(client.Client);
                 ServerLog("connected");
             }
         }
 
-        static async Task Handle(Socket socket)
+        static async Task ReceiveHandle(Socket socket)
         {
             while (true)
             {
@@ -76,7 +76,7 @@ namespace Npgg.AsyncAwaitSocket
 
                 var message = Encoding.UTF8.GetString(payload).Trim();
 
-                ServerLog(message);
+                //ServerLog(message);
             }
         }
 
