@@ -12,9 +12,20 @@ namespace Npgg.SocketExtensions
         public static async Task<byte[]> ReceiveAsync(this Socket socket, int length)
         {
             byte[] buffer = new byte[length];
-            int receiveCount = await Task.Factory.FromAsync(
-                       socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None, null, socket),
-                       socket.EndReceive);
+
+            int rest = length;
+            int receiveCount = 0;
+            while (rest > 0)
+            {
+                int recv = await Task.Factory.FromAsync(
+                           socket.BeginReceive(buffer, receiveCount, rest, SocketFlags.None, null, socket),
+                           socket.EndReceive);
+
+                rest -= recv;
+                receiveCount += recv;
+            }
+
+            //int receiveCount = socket.ReceiveFromAsync(buffer, 0, buffer.Length, SocketFlags.None);
 
             if (receiveCount == 0)
             {
