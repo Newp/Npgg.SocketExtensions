@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Npgg.SocketExtensions
@@ -15,26 +16,17 @@ namespace Npgg.SocketExtensions
 
             int rest = length;
             int receiveCount = 0;
+            
             while (rest > 0)
             {
-                int recv = await Task.Factory.FromAsync(
-                           socket.BeginReceive(buffer, receiveCount, rest, SocketFlags.None, null, socket),
+                var begin = socket.BeginReceive(buffer, receiveCount, rest, SocketFlags.None, null, null);
+                int recv = await Task.Factory.FromAsync(begin,
                            socket.EndReceive);
+
+                if (recv == 0) throw new Exception("recv 0");
 
                 rest -= recv;
                 receiveCount += recv;
-            }
-
-            //int receiveCount = socket.ReceiveFromAsync(buffer, 0, buffer.Length, SocketFlags.None);
-
-            if (receiveCount == 0)
-            {
-                throw new Exception("recv 0");
-            }
-
-            if (receiveCount != length)
-            {
-
             }
             return buffer;
         }
